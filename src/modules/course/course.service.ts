@@ -8,6 +8,7 @@ import { CourseDto } from './course.dto';
 import { PrismaService } from 'src/database/prisma.service';
 import { TokenPayloadDto } from '../auth/auth.dto';
 import { Course } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class CourseService {
@@ -20,12 +21,15 @@ export class CourseService {
     courseDto: Omit<CourseDto, 'id'>,
     user: TokenPayloadDto,
   ): Promise<Course> {
-    const { title, content } = courseDto;
+    const { title, content, password } = courseDto;
+
+    const hashedPassword = await bcrypt.hash(password || 'default', 10);
 
     return await this.prismaService.course.create({
       data: {
         title,
         content,
+        password: password ? hashedPassword : null,
         teacher_id: user.id,
         created_at: new Date(),
       },
@@ -36,7 +40,7 @@ export class CourseService {
     courseDto: CourseDto,
     user: TokenPayloadDto,
   ): Promise<Course | never> {
-    const { title, content } = courseDto;
+    const { title, content, opened } = courseDto;
 
     const course = await this.prismaService.course.findUnique({
       where: { id: courseDto.id },
@@ -54,7 +58,7 @@ export class CourseService {
 
     return await this.prismaService.course.update({
       where: { id: courseDto.id },
-      data: { title, content },
+      data: { title, content, opened },
     });
   }
 

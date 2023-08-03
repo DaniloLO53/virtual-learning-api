@@ -33,17 +33,15 @@ export class CourseController {
     @Request() request: any,
     @Param('id') id: string,
   ) {
-    const user = request.user;
     return await this.courseService.update(
       { ...courseDto, id: Number(id) },
-      user,
+      request.user,
     );
   }
 
   @Delete(':id')
   @RequiredRoles(Roles.Teacher)
   async delete(@Request() request: any, @Param('id') id: string) {
-    const user = request.user;
-    return await this.courseService.delete(Number(id), user);
+    return await this.courseService.delete(Number(id), request.user);
   }
 }

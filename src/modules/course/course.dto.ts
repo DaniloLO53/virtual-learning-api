@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
 
 export class CourseDto {
   @IsNotEmpty()
@@ -11,4 +11,10 @@ export class CourseDto {
 
   @IsString()
   id: number;
+
+  @IsString()
+  password: string;
+
+  @IsBoolean()
+  opened: boolean;
 }

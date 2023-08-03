@@ -36,6 +36,8 @@ model Course {
   id            Int            @id @default(autoincrement())
   title         String
   content       String?
+  password      String?
+  opened        Boolean        @default(true)
   teacher       Teacher        @relation(fields: [teacher_id], references: [id], onDelete: Cascade)
   teacher_id    Int
   registrations Registration[]
