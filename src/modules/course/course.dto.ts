@@ -8,4 +8,7 @@ export class CourseDto {
   @IsNotEmpty()
   @IsString()
   content: string;
+
+  @IsString()
+  id: number;
 }

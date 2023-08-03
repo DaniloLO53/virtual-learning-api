@@ -13,7 +13,10 @@ import * as bcrypt from 'bcrypt';
 export class UserService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async signUp(signUpDto: SignUpDto, role: Role): Promise<any> {
+  async signUp(
+    signUpDto: SignUpDto,
+    role: Role,
+  ): Promise<Student | Teacher | never> {
     const { password, email } = signUpDto;
 
     if (role !== 'student' && role !== 'teacher') {
