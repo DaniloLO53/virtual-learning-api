@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   Post,
   Put,
@@ -43,5 +44,13 @@ export class CourseController {
   @RequiredRoles(Roles.Teacher)
   async delete(@Request() request: any, @Param('id') id: string) {
     return await this.courseService.delete(Number(id), request.user);
+  }
+
+  @Get()
+  @RequiredRoles(Roles.Student)
+  async listAll(@Request() request: any) {
+    const { id } = request.user;
+
+    return await this.courseService.listAll(id);
   }
 }

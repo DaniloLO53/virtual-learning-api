@@ -17,6 +17,18 @@ export class CourseService {
     private readonly userService: UserService,
   ) {}
 
+  async listAll(student_id: number) {
+    return await this.prismaService.course.findMany({
+      where: {
+        registrations: {
+          some: {
+            student_id,
+          },
+        },
+      },
+    });
+  }
+
   async create(
     courseDto: Omit<CourseDto, 'id'>,
     user: TokenPayloadDto,
