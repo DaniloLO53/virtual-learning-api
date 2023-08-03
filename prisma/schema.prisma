@@ -36,9 +36,8 @@ model Course {
   id            Int            @id @default(autoincrement())
   title         String
   content       String?
-  published     Boolean?       @default(false)
-  teacher       Teacher?       @relation(fields: [teacher_id], references: [id], onDelete: Cascade)
-  teacher_id    Int?
+  teacher       Teacher        @relation(fields: [teacher_id], references: [id], onDelete: Cascade)
+  teacher_id    Int
   registrations Registration[]
   updated_at    DateTime       @default(now())
   created_at    DateTime

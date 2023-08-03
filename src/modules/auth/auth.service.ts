@@ -6,7 +6,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import { Role } from '../user/user.types';
-import { signInDto } from './auth.dto';
+import { SignInDto } from './auth.dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -16,7 +16,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async signIn(signInDto: signInDto, role: Role): Promise<any> {
+  async signIn(signInDto: SignInDto, role: Role): Promise<any> {
     const { password, email } = signInDto;
 
     if (role !== 'student' && role !== 'teacher') {
