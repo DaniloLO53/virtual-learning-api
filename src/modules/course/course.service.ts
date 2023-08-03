@@ -57,4 +57,22 @@ export class CourseService {
       data: { title, content },
     });
   }
+
+  async delete(id: number, user: TokenPayloadDto): Promise<Course | never> {
+    const course = await this.prismaService.course.findUnique({
+      where: { id },
+    });
+    if (!course) {
+      throw new NotFoundException({
+        message: 'Course not found',
+      });
+    }
+    if (course.teacher_id !== user.id) {
+      throw new UnauthorizedException({
+        message: 'Can only modify own content',
+      });
+    }
+
+    return await this.prismaService.course.delete({ where: { id } });
+  }
 }

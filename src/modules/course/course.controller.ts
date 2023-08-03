@@ -1,4 +1,12 @@
-import { Body, Controller, Param, Post, Put, Request } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Param,
+  Post,
+  Put,
+  Request,
+} from '@nestjs/common';
 import { RequiredRoles } from 'src/decorators/roles.decorator';
 import { Roles } from '../user/user.enums';
 import { CourseDto } from './course.dto';
@@ -30,5 +38,12 @@ export class CourseController {
       { ...courseDto, id: Number(id) },
       user,
     );
+  }
+
+  @Delete(':id')
+  @RequiredRoles(Roles.Teacher)
+  async delete(@Request() request: any, @Param('id') id: string) {
+    const user = request.user;
+    return await this.courseService.delete(Number(id), user);
   }
 }
