@@ -17,7 +17,7 @@ export class UserService {
     signUpDto: SignUpDto,
     role: Role,
   ): Promise<Student | Teacher | never> {
-    const { password, email } = signUpDto;
+    const { password, confirmPassword, email } = signUpDto;
 
     if (role !== 'student' && role !== 'teacher') {
       throw new BadRequestException({
@@ -30,6 +30,11 @@ export class UserService {
     if (user) {
       throw new ConflictException({
         message: 'user already registered',
+      });
+    }
+    if (password !== confirmPassword) {
+      throw new BadRequestException({
+        message: 'Passwords must match',
       });
     }
 
