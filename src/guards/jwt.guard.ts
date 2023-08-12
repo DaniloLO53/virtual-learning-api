@@ -1,20 +1,16 @@
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
   CanActivate,
   ExecutionContext,
-  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
-import { Cache } from 'cache-manager';
 import { IS_PUBLIC_KEY } from 'src/decorators/isPublic.decorator';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly jwtService: JwtService,
     private readonly reflector: Reflector,
   ) {}
@@ -29,7 +25,8 @@ export class AuthGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest();
-    const token = await this.extractTokenFromCache();
+    const token = this.extractTokenFromHeader(request);
+    console.log('TOKEN', token);
     if (!token) {
       throw new UnauthorizedException();
     }
@@ -44,9 +41,10 @@ export class AuthGuard implements CanActivate {
     return true;
   }
 
-  private async extractTokenFromCache(): Promise<string | undefined> {
-    const tokenBody: string = await this.cacheManager.get('access_token');
-    const [type, token] = tokenBody.split(' ') ?? [];
+  private extractTokenFromHeader(request: any): string | undefined {
+    const { authorization } = request.headers;
+    console.log('authorization:', authorization);
+    const [type, token] = authorization.split(' ') ?? [];
     return type === 'Bearer' ? token : undefined;
   }
 }
