@@ -1,4 +1,3 @@
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Body, Controller, Post, Headers, Response } from '@nestjs/common';
 import { Response as IResponse } from 'express';
 import { Public } from 'src/decorators/isPublic.decorator';
@@ -12,7 +11,11 @@ export class AuthController {
 
   @Public()
   @Post('sign-in')
-  async signIn(@Body() signInDto: SignInDto, @Headers('role') role: Role) {
+  async signIn(
+    @Body() signInDto: SignInDto,
+    @Headers('role') role: Role,
+    @Response({ passthrough: true }) response: IResponse,
+  ) {
     const { access_token } = await this.authService.signIn(signInDto, role);
 
     return { access_token };

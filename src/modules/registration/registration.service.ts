@@ -32,7 +32,6 @@ export class RegistrationService {
         },
       },
     });
-    console.log(course);
     if (!course) {
       throw new NotFoundException({
         message: 'Course not found',
