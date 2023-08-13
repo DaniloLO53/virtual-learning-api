@@ -18,12 +18,39 @@ export class CourseService {
   ) {}
 
   async listAll(student_id: number) {
+    console.log('stdid', student_id);
     return await this.prismaService.course.findMany({
       where: {
         registrations: {
           some: {
             student_id,
           },
+        },
+      },
+      include: {
+        teacher: {
+          select: {
+            email: true,
+          },
+        },
+        activities: {
+          include: {
+            activities_done: {
+              where: {
+                student_id,
+              },
+            },
+          },
+          orderBy: [
+            {
+              activities_done: {
+                _count: 'asc',
+              },
+            },
+            {
+              deadline: 'asc',
+            },
+          ],
         },
       },
     });

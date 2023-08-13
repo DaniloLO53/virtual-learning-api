@@ -11,12 +11,13 @@ datasource db {
 }
 
 model Student {
-  id            Int            @id @default(autoincrement())
-  email         String         @unique
-  password      String
-  registrations Registration[]
-  updated_at    DateTime       @default(now())
-  created_at    DateTime
+  id              Int              @id @default(autoincrement())
+  email           String           @unique
+  password        String
+  registrations   Registration[]
+  updated_at      DateTime         @default(now())
+  created_at      DateTime
+  activities_done ActivitiesDone[]
 
   @@map("students")
 }
@@ -43,8 +44,34 @@ model Course {
   registrations Registration[]
   updated_at    DateTime       @default(now())
   created_at    DateTime
+  activities    Activity[]
 
   @@map("courses")
+}
+
+model Activity {
+  id              Int              @id @default(autoincrement())
+  title           String
+  description     String
+  deadline        DateTime?
+  course          Course           @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  course_id       Int
+  updated_at      DateTime         @default(now())
+  created_at      DateTime
+  activities_done ActivitiesDone[]
+
+  @@map("activities")
+}
+
+model ActivitiesDone {
+  id          Int      @id @default(autoincrement())
+  activity_id Int
+  activity    Activity @relation(fields: [activity_id], references: [id], onDelete: Cascade)
+  student_id  Int
+  student     Student  @relation(fields: [student_id], references: [id], onDelete: Cascade)
+  created_at  DateTime
+
+  @@map("activities_done")
 }
 
 model Registration {
