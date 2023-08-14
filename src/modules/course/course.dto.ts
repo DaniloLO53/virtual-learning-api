@@ -1,4 +1,4 @@
-import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsString, Matches } from 'class-validator';
 
 export class CourseDto {
   @IsNotEmpty()
@@ -9,6 +9,11 @@ export class CourseDto {
   @IsString()
   content: string;
 
+  @IsNotEmpty()
+  @IsString()
+  @Matches(/[A-Z]{3}\d{3}/)
+  code: string;
+
   @IsString()
   id: number;
 
@@ -17,4 +22,8 @@ export class CourseDto {
 
   @IsBoolean()
   opened: boolean;
+}
+
+export interface CourseQuery {
+  query: string;
 }

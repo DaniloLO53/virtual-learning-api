@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Request,
 } from '@nestjs/common';
 import { RequiredRoles } from 'src/decorators/roles.decorator';
@@ -52,5 +53,11 @@ export class CourseController {
     const { id } = request.user;
 
     return await this.courseService.listAll(id);
+  }
+
+  @Get('query')
+  @RequiredRoles(Roles.Student)
+  async getByQueries(@Request() request: any, @Query('query') query: string) {
+    return await this.courseService.getByQueries(query);
   }
 }

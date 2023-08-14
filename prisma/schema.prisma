@@ -36,6 +36,7 @@ model Teacher {
 model Course {
   id            Int            @id @default(autoincrement())
   title         String
+  code          String         @default("XXX000")
   content       String?
   password      String?
   opened        Boolean        @default(true)

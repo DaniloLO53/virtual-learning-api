@@ -17,8 +17,40 @@ export class CourseService {
     private readonly userService: UserService,
   ) {}
 
+  async getByQueries(query: string) {
+    if (query.length === 0) return [];
+
+    return await this.prismaService.course.findMany({
+      where: {
+        OR: [
+          {
+            title: {
+              contains: query,
+              mode: 'insensitive',
+            },
+          },
+          {
+            code: {
+              contains: query,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      },
+      select: {
+        code: true,
+        title: true,
+        id: true,
+        teacher: {
+          select: {
+            email: true,
+          },
+        },
+      },
+    });
+  }
+
   async listAll(student_id: number) {
-    console.log('stdid', student_id);
     return await this.prismaService.course.findMany({
       where: {
         registrations: {
@@ -60,7 +92,7 @@ export class CourseService {
     courseDto: Omit<CourseDto, 'id'>,
     user: TokenPayloadDto,
   ): Promise<Course> {
-    const { title, content, password } = courseDto;
+    const { title, content, password, code } = courseDto;
 
     const hashedPassword = await bcrypt.hash(password || 'default', 10);
 
@@ -70,6 +102,7 @@ export class CourseService {
         content,
         password: password ? hashedPassword : null,
         teacher_id: user.id,
+        code,
         created_at: new Date(),
       },
     });
