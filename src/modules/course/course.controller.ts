@@ -55,6 +55,15 @@ export class CourseController {
     return await this.courseService.listAll(id);
   }
 
+  @Get(':courseId/registration')
+  @RequiredRoles(Roles.Student)
+  async getRegistrationInfos(
+    @Request() request: any,
+    @Param('courseId') courseId: string,
+  ) {
+    return await this.courseService.getRegistrationInfos(Number(courseId));
+  }
+
   @Get('query')
   @RequiredRoles(Roles.Student)
   async getByQueries(@Request() request: any, @Query('query') query: string) {

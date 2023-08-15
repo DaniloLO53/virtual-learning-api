@@ -22,15 +22,17 @@ export class RegistrationController {
   }
 
   @Delete()
-  @RequiredRoles(Roles.Student, Roles.Teacher)
+  @RequiredRoles(Roles.Student)
   async delete(
-    @Body() registrationDto: Omit<RegistrationDto, 'student_id'>,
+    @Body() registrationDto: { course_id: number },
     @Request() request: any,
   ) {
     const { id, role } = request.user;
-    return await this.registrationService.create({
-      ...registrationDto,
-      student_id: id,
-    });
+    return await this.registrationService.delete(
+      {
+        ...registrationDto,
+      },
+      id,
+    );
   }
 }

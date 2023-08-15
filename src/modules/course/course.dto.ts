@@ -7,7 +7,7 @@ export class CourseDto {
 
   @IsNotEmpty()
   @IsString()
-  content: string;
+  description: string;
 
   @IsNotEmpty()
   @IsString()

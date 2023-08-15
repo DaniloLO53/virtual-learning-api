@@ -22,6 +22,7 @@ export class CourseService {
 
     return await this.prismaService.course.findMany({
       where: {
+        opened: true,
         OR: [
           {
             title: {
@@ -46,6 +47,30 @@ export class CourseService {
             email: true,
           },
         },
+      },
+    });
+  }
+
+  async getRegistrationInfos(courseId: number) {
+    return await this.prismaService.course.findUnique({
+      where: {
+        id: courseId,
+      },
+      select: {
+        registrations: {
+          select: {
+            student_id: true,
+          },
+        },
+        code: true,
+        teacher: {
+          select: {
+            email: true,
+          },
+        },
+        title: true,
+        description: true,
+        password: true,
       },
     });
   }
@@ -92,14 +117,14 @@ export class CourseService {
     courseDto: Omit<CourseDto, 'id'>,
     user: TokenPayloadDto,
   ): Promise<Course> {
-    const { title, content, password, code } = courseDto;
+    const { title, description, password, code } = courseDto;
 
     const hashedPassword = await bcrypt.hash(password || 'default', 10);
 
     return await this.prismaService.course.create({
       data: {
         title,
-        content,
+        description,
         password: password ? hashedPassword : null,
         teacher_id: user.id,
         code,
@@ -112,7 +137,7 @@ export class CourseService {
     courseDto: CourseDto,
     user: TokenPayloadDto,
   ): Promise<Course | never> {
-    const { title, content, opened } = courseDto;
+    const { title, description, opened } = courseDto;
 
     const course = await this.prismaService.course.findUnique({
       where: { id: courseDto.id },
@@ -124,13 +149,13 @@ export class CourseService {
     }
     if (course.teacher_id !== user.id) {
       throw new UnauthorizedException({
-        message: 'Can only modify own content',
+        message: 'Can only modify own description',
       });
     }
 
     return await this.prismaService.course.update({
       where: { id: courseDto.id },
-      data: { title, content, opened },
+      data: { title, description, opened },
     });
   }
 

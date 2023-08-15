@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class RegistrationDto {
   @IsNotEmpty()
@@ -6,10 +6,9 @@ export class RegistrationDto {
   course_id: number;
 
   @IsNotEmpty()
-  @IsNumber()
+  @IsBoolean()
   student_id: number;
 
-  @IsNotEmpty()
   @IsString()
   password: string;
 }

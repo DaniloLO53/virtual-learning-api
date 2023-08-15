@@ -17,6 +17,29 @@ export class RegistrationService {
     private readonly userService: UserService,
   ) {}
 
+  async delete(
+    { course_id }: { course_id: number },
+    student_id: number,
+  ): Promise<Registration> {
+    const registration = await this.prismaService.registration.findFirst({
+      where: {
+        student_id,
+        course_id,
+      },
+    });
+    if (!registration) {
+      throw new NotFoundException({
+        message: 'Registration not found',
+      });
+    }
+
+    return await this.prismaService.registration.delete({
+      where: {
+        id: registration.id,
+      },
+    });
+  }
+
   async create(registrationDto: RegistrationDto): Promise<Registration> {
     const { student_id, course_id, password } = registrationDto;
 
