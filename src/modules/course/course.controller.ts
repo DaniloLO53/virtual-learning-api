@@ -47,7 +47,7 @@ export class CourseController {
     return await this.courseService.delete(Number(id), request.user);
   }
 
-  @Get()
+  @Get('created')
   @RequiredRoles(Roles.Teacher)
   async getCreatedCourses(@Request() request: any) {
     const { id } = request.user;
@@ -55,7 +55,7 @@ export class CourseController {
     return await this.courseService.getCreatedCourses(id);
   }
 
-  @Get()
+  @Get('registered')
   @RequiredRoles(Roles.Student)
   async getRegisteredCourses(@Request() request: any) {
     const { id } = request.user;
@@ -74,15 +74,6 @@ export class CourseController {
       Number(courseId),
       userId,
     );
-  }
-
-  @Get(':courseId/participants')
-  @RequiredRoles(Roles.Student, Roles.Teacher)
-  async getParticipants(
-    @Request() request: any,
-    @Param('courseId') courseId: string,
-  ) {
-    return await this.courseService.getParticipants(Number(courseId));
   }
 
   @Get('query')

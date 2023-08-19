@@ -79,34 +79,6 @@ export class CourseService {
     });
   }
 
-  async getParticipants(course_id: number) {
-    return await this.prismaService.course.findUnique({
-      where: {
-        id: course_id,
-      },
-      select: {
-        teacher: {
-          select: {
-            email: true,
-          },
-        },
-        registrations: {
-          where: {
-            course_id,
-          },
-          select: {
-            id: true,
-            student: {
-              select: {
-                email: true,
-              },
-            },
-          },
-        },
-      },
-    });
-  }
-
   async getCreatedCourses(teacher_id: number) {
     return await this.prismaService.course.findMany({
       where: {

@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Param, Post, Request } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Request,
+} from '@nestjs/common';
 import { RequiredRoles } from 'src/decorators/roles.decorator';
 import { Roles } from '../user/user.enums';
 import { RegistrationDto } from './registration.dto';
@@ -7,6 +15,15 @@ import { RegistrationService } from './registration.service';
 @Controller('registrations')
 export class RegistrationController {
   constructor(private registrationService: RegistrationService) {}
+
+  @Get('courses/:courseId')
+  @RequiredRoles(Roles.Student, Roles.Teacher)
+  async getParticipants(
+    @Request() request: any,
+    @Param('courseId') courseId: string,
+  ) {
+    return await this.registrationService.getParticipants(Number(courseId));
+  }
 
   @Post()
   @RequiredRoles(Roles.Student)

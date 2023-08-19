@@ -17,10 +17,35 @@ export class RegistrationService {
     private readonly userService: UserService,
   ) {}
 
-  async delete(
-    student_id: number,
-    registration_id: number,
-  ): Promise<Registration> {
+  async getParticipants(course_id: number) {
+    return await this.prismaService.course.findUnique({
+      where: {
+        id: course_id,
+      },
+      select: {
+        teacher: {
+          select: {
+            email: true,
+          },
+        },
+        registrations: {
+          where: {
+            course_id,
+          },
+          select: {
+            id: true,
+            student: {
+              select: {
+                email: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  async delete(student_id: number, registration_id: number) {
     console.log('student_id', student_id);
     console.log('registration_id', registration_id);
     const registration = await this.prismaService.registration.findFirst({
@@ -28,19 +53,21 @@ export class RegistrationService {
         id: registration_id,
       },
     });
-    const registrations = await this.prismaService.registration.findMany();
-    console.log('reg', registrations);
+    // const registrations = await this.prismaService.registration.findMany();
+    // console.log('reg', registrations);
     if (!registration) {
       throw new NotFoundException({
         message: 'Registration not found',
       });
     }
 
-    return await this.prismaService.registration.delete({
+    await this.prismaService.registration.delete({
       where: {
         id: registration.id,
       },
     });
+
+    return await this.getParticipants(registration.course_id);
   }
 
   async create(registrationDto: RegistrationDto): Promise<Registration> {
