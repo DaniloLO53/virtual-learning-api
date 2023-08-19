@@ -51,13 +51,16 @@ export class CourseService {
     });
   }
 
-  async getRegistrationInfos(courseId: number) {
+  async getRegistrationInfos(courseId: number, student_id: number) {
     return await this.prismaService.course.findUnique({
       where: {
         id: courseId,
       },
       select: {
         registrations: {
+          where: {
+            student_id,
+          },
           select: {
             student_id: true,
           },
@@ -71,11 +74,53 @@ export class CourseService {
         title: true,
         description: true,
         password: true,
+        id: true,
       },
     });
   }
 
-  async listAll(student_id: number) {
+  async getParticipants(course_id: number) {
+    return await this.prismaService.course.findUnique({
+      where: {
+        id: course_id,
+      },
+      select: {
+        teacher: {
+          select: {
+            email: true,
+          },
+        },
+        registrations: {
+          where: {
+            course_id,
+          },
+          select: {
+            id: true,
+            student: {
+              select: {
+                email: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  async getCreatedCourses(teacher_id: number) {
+    return await this.prismaService.course.findMany({
+      where: {
+        teacher_id,
+      },
+      select: {
+        id: true,
+        code: true,
+        title: true,
+      },
+    });
+  }
+
+  async getRegisteredCourses(student_id: number) {
     return await this.prismaService.course.findMany({
       where: {
         registrations: {
@@ -84,7 +129,10 @@ export class CourseService {
           },
         },
       },
-      include: {
+      select: {
+        id: true,
+        code: true,
+        title: true,
         teacher: {
           select: {
             email: true,

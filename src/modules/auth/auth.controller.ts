@@ -16,8 +16,8 @@ export class AuthController {
     @Headers('role') role: Role,
     @Response({ passthrough: true }) response: IResponse,
   ) {
-    const { access_token } = await this.authService.signIn(signInDto, role);
+    const data = await this.authService.signIn(signInDto, role);
 
-    return { access_token };
+    return { access_token: data.access_token, role: data.role };
   }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Post, Request } from '@nestjs/common';
+import { Body, Controller, Delete, Param, Post, Request } from '@nestjs/common';
 import { RequiredRoles } from 'src/decorators/roles.decorator';
 import { Roles } from '../user/user.enums';
 import { RegistrationDto } from './registration.dto';
@@ -21,18 +21,13 @@ export class RegistrationController {
     });
   }
 
-  @Delete()
-  @RequiredRoles(Roles.Student)
+  @Delete(':registrationId')
+  @RequiredRoles(Roles.Student, Roles.Teacher)
   async delete(
-    @Body() registrationDto: { course_id: number },
+    @Param('registrationId') registrationId: string,
     @Request() request: any,
   ) {
     const { id, role } = request.user;
-    return await this.registrationService.delete(
-      {
-        ...registrationDto,
-      },
-      id,
-    );
+    return await this.registrationService.delete(id, Number(registrationId));
   }
 }

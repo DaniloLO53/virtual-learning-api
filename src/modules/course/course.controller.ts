@@ -48,11 +48,19 @@ export class CourseController {
   }
 
   @Get()
-  @RequiredRoles(Roles.Student)
-  async listAll(@Request() request: any) {
+  @RequiredRoles(Roles.Teacher)
+  async getCreatedCourses(@Request() request: any) {
     const { id } = request.user;
 
-    return await this.courseService.listAll(id);
+    return await this.courseService.getCreatedCourses(id);
+  }
+
+  @Get()
+  @RequiredRoles(Roles.Student)
+  async getRegisteredCourses(@Request() request: any) {
+    const { id } = request.user;
+
+    return await this.courseService.getRegisteredCourses(id);
   }
 
   @Get(':courseId/registration')
@@ -61,7 +69,20 @@ export class CourseController {
     @Request() request: any,
     @Param('courseId') courseId: string,
   ) {
-    return await this.courseService.getRegistrationInfos(Number(courseId));
+    const userId = request.user.id;
+    return await this.courseService.getRegistrationInfos(
+      Number(courseId),
+      userId,
+    );
+  }
+
+  @Get(':courseId/participants')
+  @RequiredRoles(Roles.Student, Roles.Teacher)
+  async getParticipants(
+    @Request() request: any,
+    @Param('courseId') courseId: string,
+  ) {
+    return await this.courseService.getParticipants(Number(courseId));
   }
 
   @Get('query')

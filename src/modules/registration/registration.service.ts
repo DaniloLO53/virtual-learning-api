@@ -18,15 +18,18 @@ export class RegistrationService {
   ) {}
 
   async delete(
-    { course_id }: { course_id: number },
     student_id: number,
+    registration_id: number,
   ): Promise<Registration> {
+    console.log('student_id', student_id);
+    console.log('registration_id', registration_id);
     const registration = await this.prismaService.registration.findFirst({
       where: {
-        student_id,
-        course_id,
+        id: registration_id,
       },
     });
+    const registrations = await this.prismaService.registration.findMany();
+    console.log('reg', registrations);
     if (!registration) {
       throw new NotFoundException({
         message: 'Registration not found',
