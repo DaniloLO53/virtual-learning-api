@@ -12,3 +12,13 @@ export class ArticleDto {
   @IsNumber()
   course_id: number;
 }
+
+export class SectionDto {
+  @IsNotEmpty()
+  @IsString()
+  title: string;
+
+  @IsNotEmpty()
+  @IsString()
+  content: string;
+}

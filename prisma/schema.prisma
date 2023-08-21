@@ -53,8 +53,8 @@ model Course {
 
 model Section {
   id         Int      @id @default(autoincrement())
-  title      String
   content    String
+  title      String
   article    Article  @relation(fields: [article_id], references: [id], onDelete: Cascade)
   article_id Int
   updated_at DateTime @default(now())

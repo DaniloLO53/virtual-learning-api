@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { ArticleDto } from './article.dto';
+import { ArticleDto, SectionDto } from './article.dto';
 import { PrismaService } from 'src/database/prisma.service';
 import { TokenPayloadDto } from '../auth/auth.dto';
-import { Article } from '@prisma/client';
+import { Article, Section } from '@prisma/client';
 
 @Injectable()
 export class ArticleService {
@@ -27,6 +27,26 @@ export class ArticleService {
     });
   }
 
+  async getArticles(course_id: number) {
+    return await this.prismaService.article.findMany({
+      where: {
+        course_id,
+      },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        sections: {
+          select: {
+            title: true,
+            id: true,
+            updated_at: true,
+          },
+        },
+      },
+    });
+  }
+
   async create(
     articleDto: Omit<ArticleDto, 'id'>,
     user: TokenPayloadDto,
@@ -39,6 +59,34 @@ export class ArticleService {
         description,
         course_id,
         created_at: new Date(),
+      },
+    });
+  }
+
+  async createSection(
+    sectionDto: Omit<SectionDto, 'id'>,
+    article_id: number,
+  ): Promise<Section> {
+    const { content, title } = sectionDto;
+    return await this.prismaService.section.create({
+      data: {
+        title,
+        content,
+        article_id,
+        created_at: new Date(),
+      },
+    });
+  }
+
+  async getSection(id: number) {
+    return await this.prismaService.section.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        id: true,
+        title: true,
+        content: true,
       },
     });
   }
