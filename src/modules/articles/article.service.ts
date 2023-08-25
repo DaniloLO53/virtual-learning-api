@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ArticleDto, SectionDto } from './article.dto';
 import { PrismaService } from 'src/database/prisma.service';
 import { TokenPayloadDto } from '../auth/auth.dto';
@@ -42,7 +46,13 @@ export class ArticleService {
             id: true,
             updated_at: true,
           },
+          orderBy: {
+            created_at: 'asc',
+          },
         },
+      },
+      orderBy: {
+        created_at: 'asc',
       },
     });
   }
@@ -91,47 +101,80 @@ export class ArticleService {
     });
   }
 
-  // async update(
-  //   courseDto: CourseDto,
-  //   user: TokenPayloadDto,
-  // ): Promise<Course | never> {
-  //   const { title, description, opened } = courseDto;
+  async updateSection(
+    sectionDto: SectionDto,
+    user: TokenPayloadDto,
+  ): Promise<Section | never> {
+    const { title, content } = sectionDto;
 
-  //   const course = await this.prismaService.course.findUnique({
-  //     where: { id: courseDto.id },
-  //   });
-  //   if (!course) {
-  //     throw new NotFoundException({
-  //       message: 'Course not found',
-  //     });
-  //   }
-  //   if (course.teacher_id !== user.id) {
-  //     throw new UnauthorizedException({
-  //       message: 'Can only modify own description',
-  //     });
-  //   }
+    const section = await this.prismaService.section.findUnique({
+      where: { id: sectionDto.id },
+      include: {
+        article: {
+          include: {
+            course: {
+              include: {
+                teacher: {
+                  select: {
+                    id: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+    if (!section) {
+      throw new NotFoundException({
+        message: 'Section not found',
+      });
+    }
+    if (section.article.course.teacher_id !== user.id) {
+      throw new UnauthorizedException({
+        message: 'Can only modify own description',
+      });
+    }
 
-  //   return await this.prismaService.course.update({
-  //     where: { id: courseDto.id },
-  //     data: { title, description, opened },
-  //   });
-  // }
+    return await this.prismaService.section.update({
+      where: { id: sectionDto.id },
+      data: { title, content, updated_at: new Date() },
+    });
+  }
 
-  // async delete(id: number, user: TokenPayloadDto): Promise<Course | never> {
-  //   const course = await this.prismaService.course.findUnique({
-  //     where: { id },
-  //   });
-  //   if (!course) {
-  //     throw new NotFoundException({
-  //       message: 'Course not found',
-  //     });
-  //   }
-  //   if (course.teacher_id !== user.id) {
-  //     throw new UnauthorizedException({
-  //       message: 'Can only modify own content',
-  //     });
-  //   }
+  async deleteSection(
+    id: number,
+    user: TokenPayloadDto,
+  ): Promise<Section | never> {
+    const section = await this.prismaService.section.findUnique({
+      where: { id },
+      include: {
+        article: {
+          include: {
+            course: {
+              include: {
+                teacher: {
+                  select: {
+                    id: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+    if (!section) {
+      throw new NotFoundException({
+        message: 'Course not found',
+      });
+    }
+    if (section.article.course.teacher_id !== user.id) {
+      throw new UnauthorizedException({
+        message: 'Can only modify own content',
+      });
+    }
 
-  //   return await this.prismaService.course.delete({ where: { id } });
-  // }
+    return await this.prismaService.section.delete({ where: { id } });
+  }
 }

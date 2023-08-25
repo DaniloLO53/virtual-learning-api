@@ -19,6 +19,8 @@ export class AuthService {
   async signIn(signInDto: SignInDto, role: Role): Promise<any> {
     const { password, email } = signInDto;
 
+    console.log('role', role);
+
     if (role !== 'student' && role !== 'teacher') {
       throw new BadRequestException({
         message: 'Invalid role',

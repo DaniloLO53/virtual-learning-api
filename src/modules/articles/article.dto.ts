@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, isNumber, IsNumber, IsString } from 'class-validator';
 
 export class ArticleDto {
   @IsNotEmpty()
@@ -21,4 +21,7 @@ export class SectionDto {
   @IsNotEmpty()
   @IsString()
   content: string;
+
+  @IsNotEmpty()
+  id: number;
 }
