@@ -78,9 +78,11 @@ model Article {
 
 model Activity {
   id              Int              @id @default(autoincrement())
+  uuid            String           @default("")
   title           String
   description     String
   deadline        DateTime?
+  file            Json?
   course          Course           @relation(fields: [course_id], references: [id], onDelete: Cascade)
   course_id       Int
   updated_at      DateTime         @default(now())

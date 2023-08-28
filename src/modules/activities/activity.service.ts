@@ -9,16 +9,18 @@ import { PrismaService } from 'src/database/prisma.service';
 import { TokenPayloadDto } from '../auth/auth.dto';
 import { ActivityDto } from './activity.dto';
 import { parseDate } from './activity.utils';
+import { FileService } from '../file/file.service';
 
 @Injectable()
 export class ActivityService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly userService: UserService,
+    private readonly fileService: FileService,
   ) {}
 
   async listFromCourse(course_id: number) {
-    return await this.prismaService.activity.findMany({
+    const activities = await this.prismaService.activity.findMany({
       where: {
         course_id,
       },
@@ -26,6 +28,11 @@ export class ActivityService {
         deadline: 'desc',
       },
     });
+
+    return activities.map((activity) => ({
+      ...activity,
+      files: this.fileService.getActivityFiles(activity.uuid),
+    }));
   }
 
   async create(
@@ -33,7 +40,9 @@ export class ActivityService {
     course_id: number,
     user: TokenPayloadDto,
   ): Promise<any> {
-    const { title, description, deadline } = activityDto;
+    const { title, description, deadline, uuid, file } = activityDto;
+
+    console.log('File', file);
 
     const course = await this.prismaService.course.findUnique({
       where: {
@@ -60,10 +69,11 @@ export class ActivityService {
         description,
         deadline: dateFormatedDeadline,
         course_id,
+        uuid,
         created_at: new Date(),
       },
     });
-  }
+  } //
 
   async doActivity(activity_id: number, user: TokenPayloadDto): Promise<any> {
     const activity = await this.prismaService.activity.findUnique({
@@ -93,6 +103,28 @@ export class ActivityService {
         activity_id,
         student_id: user.id,
         created_at: new Date(),
+      },
+    });
+  }
+
+  async deleteActivity(
+    activity_id: number,
+    user: TokenPayloadDto,
+  ): Promise<any> {
+    const activity = await this.prismaService.activity.findUnique({
+      where: {
+        id: activity_id,
+      },
+    });
+    if (!activity) {
+      throw new NotFoundException({
+        message: 'Activity not found',
+      });
+    }
+
+    return await this.prismaService.activity.delete({
+      where: {
+        id: activity_id,
       },
     });
   }
