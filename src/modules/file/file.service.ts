@@ -17,15 +17,15 @@ export class FileService {
     const filesPaths = findFilesForId(activity_uuid);
 
     console.log('path', filesPaths);
-    if (!filesPaths) return null;
+    if (!filesPaths) return [];
     // const file = createReadStream(filesPaths[0]);
     const filesBuffer = filesPaths.map((path: string) => {
       const buffer = readFileSync(path);
       const fileName = path.split('/')[path.split('/').length - 1];
-      const name = fileName.split('_')[fileName.split('_').length - 1];
+      const [timestamp, uuid, name] = fileName.split('_');
       const [_, type] = name.split('.');
 
-      return { buffer, name, type };
+      return { buffer, name, type, timestamp, uuid };
     });
 
     const files = filesBuffer.map(
@@ -33,7 +33,7 @@ export class FileService {
     );
 
     const filesStringArray = [];
-    filesBuffer.forEach(({ buffer, name, type }: any) => {
+    filesBuffer.forEach(({ buffer, name, type, timestamp, uuid }: any) => {
       let binary = '';
       const bytes = new Uint8Array(buffer);
 
@@ -41,7 +41,13 @@ export class FileService {
         binary += String.fromCharCode(bytes[i]);
       }
 
-      filesStringArray.push({ string: btoa(binary), name, type });
+      filesStringArray.push({
+        string: btoa(binary),
+        name,
+        type,
+        timestamp,
+        uuid,
+      });
     });
 
     return filesStringArray;
