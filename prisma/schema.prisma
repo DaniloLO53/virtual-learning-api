@@ -94,10 +94,13 @@ model Activity {
 
 model ActivitiesDone {
   id          Int      @id @default(autoincrement())
+  uuid        String   @default("")
   activity_id Int
   activity    Activity @relation(fields: [activity_id], references: [id], onDelete: Cascade)
   student_id  Int
   student     Student  @relation(fields: [student_id], references: [id], onDelete: Cascade)
+  grade       String?
+  description String?
   created_at  DateTime
 
   @@map("activities_done")

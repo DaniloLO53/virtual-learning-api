@@ -35,6 +35,95 @@ export class ActivityService {
     }));
   }
 
+  async getActivity(activity_id: number) {
+    return await this.prismaService.activity.findUnique({
+      where: {
+        id: activity_id,
+      },
+      select: {
+        course_id: true,
+        deadline: true,
+        description: true,
+        title: true,
+        id: true,
+        uuid: true,
+      },
+    });
+  }
+
+  async getActivityDone(activity_id: number, student_id: number) {
+    const activityDone = await this.prismaService.activitiesDone.findFirst({
+      where: {
+        activity_id,
+        student_id,
+      },
+      select: {
+        created_at: true,
+        activity_id: true,
+        student_id: true,
+        uuid: true,
+        id: true,
+        grade: true,
+        description: true,
+        activity: {
+          select: {
+            uuid: true,
+          },
+        },
+      },
+    });
+
+    return activityDone;
+  }
+
+  async getSubmission(id: number, student_id: number) {
+    const activityDone = await this.prismaService.activitiesDone.findFirst({
+      where: {
+        id,
+      },
+      select: {
+        created_at: true,
+        activity_id: true,
+        student_id: true,
+        uuid: true,
+        id: true,
+        grade: true,
+        description: true,
+        activity: {
+          select: {
+            uuid: true,
+          },
+        },
+      },
+    });
+
+    console.log('SUBMISSION', activityDone);
+    return activityDone;
+  }
+
+  async getActivitiesDone(activity_id: number, student_id: number) {
+    const activityDone = await this.prismaService.activitiesDone.findMany({
+      where: {
+        activity_id,
+      },
+      select: {
+        student: {
+          select: {
+            email: true,
+          },
+        },
+        activity: {
+          select: {
+            id: true,
+          },
+        },
+        id: true,
+      },
+    });
+
+    return activityDone;
+  }
+
   async create(
     activityDto: Omit<ActivityDto, 'id'>,
     course_id: number,
@@ -75,7 +164,11 @@ export class ActivityService {
     });
   } //
 
-  async doActivity(activity_id: number, user: TokenPayloadDto): Promise<any> {
+  async doActivity(
+    activity_id: number,
+    body: any,
+    user: TokenPayloadDto,
+  ): Promise<any> {
     const activity = await this.prismaService.activity.findUnique({
       where: {
         id: activity_id,
@@ -102,7 +195,24 @@ export class ActivityService {
       data: {
         activity_id,
         student_id: user.id,
+        uuid: body.uuid,
         created_at: new Date(),
+      },
+    });
+  }
+
+  async assignGrade(
+    submission_id: number,
+    body: any,
+    user: TokenPayloadDto,
+  ): Promise<any> {
+    return await this.prismaService.activitiesDone.update({
+      where: {
+        id: submission_id,
+      },
+      data: {
+        grade: body.grade,
+        description: body.description || '',
       },
     });
   }
@@ -125,6 +235,25 @@ export class ActivityService {
     return await this.prismaService.activity.delete({
       where: {
         id: activity_id,
+      },
+    });
+  }
+
+  async deleteActivityDone(id: number, user: TokenPayloadDto): Promise<any> {
+    const activity = await this.prismaService.activitiesDone.findUnique({
+      where: {
+        id,
+      },
+    });
+    if (!activity) {
+      throw new NotFoundException({
+        message: 'Activity not found',
+      });
+    }
+
+    return await this.prismaService.activitiesDone.delete({
+      where: {
+        id,
       },
     });
   }

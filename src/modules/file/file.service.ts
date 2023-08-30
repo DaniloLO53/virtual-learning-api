@@ -1,7 +1,7 @@
 import { Injectable, StreamableFile } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { PrismaService } from 'src/database/prisma.service';
-import { findFilesForId } from './file.utils';
+import { findFilesForId, findSubmissionFilesForId } from './file.utils';
 import { createReadStream, readFileSync } from 'fs';
 import { Blob, File } from 'buffer';
 
@@ -49,6 +49,60 @@ export class FileService {
         uuid,
       });
     });
+
+    return filesStringArray;
+  }
+
+  getSubmissionFiles(submission_uuid: string) {
+    console.log('submission_uuid', submission_uuid);
+    const filesPaths = findSubmissionFilesForId(submission_uuid);
+
+    console.log('path', filesPaths);
+    if (!filesPaths) return [];
+    // const file = createReadStream(filesPaths[0]);
+    const filesBuffer = filesPaths.map((path: string) => {
+      const buffer = readFileSync(path);
+      const fileName = path.split('/')[path.split('/').length - 1];
+      const [timestamp, activity_uuid, submission_uuid, name] =
+        fileName.split('_');
+      const [_, type] = name.split('.');
+
+      console.log('path', path);
+
+      return { buffer, name, type, timestamp, submission_uuid, activity_uuid };
+    });
+
+    const files = filesBuffer.map(
+      ({ buffer }) => new File([buffer], 'file.png'),
+    );
+
+    const filesStringArray = [];
+    filesBuffer.forEach(
+      ({
+        buffer,
+        name,
+        type,
+        timestamp,
+        activity_uuid,
+        submission_uuid,
+      }: any) => {
+        let binary = '';
+        const bytes = new Uint8Array(buffer);
+
+        for (let i = 0; i < bytes.byteLength; i++) {
+          binary += String.fromCharCode(bytes[i]);
+        }
+
+        filesStringArray.push({
+          string: btoa(binary),
+          name,
+          type,
+          timestamp,
+          activity_uuid,
+          submission_uuid,
+        });
+      },
+    );
 
     return filesStringArray;
   }
