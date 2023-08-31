@@ -16,6 +16,10 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
+  async getUserFromAuthenticationToken(token: string) {
+    return this.jwtService.verify(token);
+  }
+
   async signIn(signInDto: SignInDto, role: Role): Promise<any> {
     const { password, email } = signInDto;
 

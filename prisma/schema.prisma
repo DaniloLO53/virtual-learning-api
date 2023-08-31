@@ -18,17 +18,19 @@ model Student {
   updated_at      DateTime         @default(now())
   created_at      DateTime
   activities_done ActivitiesDone[]
+  messages        Message[]
 
   @@map("students")
 }
 
 model Teacher {
-  id         Int      @id @default(autoincrement())
-  email      String   @unique
+  id         Int       @id @default(autoincrement())
+  email      String    @unique
   password   String
   courses    Course[]
-  updated_at DateTime @default(now())
+  updated_at DateTime  @default(now())
   created_at DateTime
+  messages   Message[]
 
   @@map("teachers")
 }
@@ -47,6 +49,7 @@ model Course {
   updated_at    DateTime       @default(now())
   created_at    DateTime
   activities    Activity[]
+  messages      Message[]
 
   @@map("courses")
 }
@@ -61,6 +64,20 @@ model Section {
   created_at DateTime
 
   @@map("sections")
+}
+
+model Message {
+  id         Int      @id @default(autoincrement())
+  content    String
+  user_id    Int
+  student    Student? @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "student_id")
+  teacher    Teacher? @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "teachers_id")
+  course_id  Int
+  course     Course   @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  updated_at DateTime @default(now())
+  created_at DateTime
+
+  @@map("messages")
 }
 
 model Article {
