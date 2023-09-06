@@ -57,14 +57,14 @@ export class ActivityService {
         activity_id,
         student_id,
       },
-      select: {
-        created_at: true,
-        activity_id: true,
-        student_id: true,
-        uuid: true,
-        id: true,
-        grade: true,
-        description: true,
+      include: {
+        // created_at: true,
+        // activity_id: true,
+        // student_id: true,
+        // uuid: true,
+        // id: true,
+        // grade: true,
+        // description: true,
         activity: {
           select: {
             uuid: true,
