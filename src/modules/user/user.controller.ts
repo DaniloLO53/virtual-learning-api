@@ -4,13 +4,15 @@ import { Role } from '../user/user.types';
 import { SignUpDto } from './user.dto';
 import { UserService } from './user.service';
 
-@Controller('sign-up')
+@Controller('auth')
 export class UserController {
   constructor(private userService: UserService) {}
 
   @Public()
-  @Post()
+  @Post('sign-up')
   async signUp(@Body() signUpDto: SignUpDto, @Headers('role') role: Role) {
-    return await this.userService.signUp(signUpDto, role);
+    const newUser = await this.userService.signUp(signUpDto, role);
+    console.log(newUser);
+    return newUser;
   }
 }

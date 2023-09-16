@@ -14,7 +14,9 @@ import { Server } from 'socket.io';
 import { OnModuleInit } from '@nestjs/common';
 
 @WebSocketGateway({ cors: { origin: '*' } })
-export class ChatGateway implements OnModuleInit {
+export class ChatGateway
+  implements OnModuleInit, OnGatewayConnection, OnGatewayDisconnect
+{
   constructor(
     private readonly authService: AuthService,
     private readonly messageService: MessageService,
@@ -36,5 +38,13 @@ export class ChatGateway implements OnModuleInit {
     this.server.on('connection', (socket) => {
       console.log(socket.id + ' connected');
     });
+  }
+
+  handleConnection(socket: Socket, ...args: any[]) {
+    socket.emit('connected');
+  }
+
+  handleDisconnect(socket: Socket) {
+    console.log('Disconnected');
   }
 }
