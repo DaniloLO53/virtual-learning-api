@@ -10,27 +10,46 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model ProfilePicture {
+  id      Int      @id @default(autoincrement())
+  title   String
+  size    String
+  type    String
+  student Student?
+  teacher Teacher?
+}
+
 model Student {
-  id              Int              @id @default(autoincrement())
-  email           String           @unique
-  password        String
-  registrations   Registration[]
-  updated_at      DateTime         @default(now())
-  created_at      DateTime
-  activities_done ActivitiesDone[]
-  messages        Message[]
+  id                 Int              @id @default(autoincrement())
+  email              String           @unique
+  password           String
+  first_name         String?
+  last_name          String?
+  gender             String           @default("none")
+  registrations      Registration[]
+  updated_at         DateTime         @default(now())
+  created_at         DateTime
+  activities_done    ActivitiesDone[]
+  messages           Message[]
+  profile_picture_id Int?             @unique
+  profile_picture    ProfilePicture?  @relation(fields: [profile_picture_id], references: [id], onDelete: Cascade)
 
   @@map("students")
 }
 
 model Teacher {
-  id         Int       @id @default(autoincrement())
-  email      String    @unique
-  password   String
-  courses    Course[]
-  updated_at DateTime  @default(now())
-  created_at DateTime
-  messages   Message[]
+  id                 Int             @id @default(autoincrement())
+  email              String          @unique
+  password           String
+  first_name         String?
+  last_name          String?
+  gender             String          @default("none")
+  courses            Course[]
+  updated_at         DateTime        @default(now())
+  created_at         DateTime
+  messages           Message[]
+  profile_picture_id Int?            @unique
+  profile_picture    ProfilePicture? @relation(fields: [profile_picture_id], references: [id], onDelete: Cascade)
 
   @@map("teachers")
 }

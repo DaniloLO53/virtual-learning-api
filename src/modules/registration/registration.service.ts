@@ -73,6 +73,8 @@ export class RegistrationService {
   async create(registrationDto: RegistrationDto): Promise<Registration> {
     const { student_id, course_id, password } = registrationDto;
 
+    console.log('HEY');
+
     const course = await this.prismaService.course.findUnique({
       where: {
         id: course_id,

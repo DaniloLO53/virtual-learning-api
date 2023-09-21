@@ -1,16 +1,17 @@
 import { Injectable, StreamableFile } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { PrismaService } from 'src/database/prisma.service';
-import { findFilesForId, findSubmissionFilesForId } from './file.utils';
+import {
+  findFilesForId,
+  findProfilePicturePathById,
+  findSubmissionFilesForId,
+} from './file.utils';
 import { createReadStream, readFileSync } from 'fs';
 import { Blob, File } from 'buffer';
 
 @Injectable()
 export class FileService {
-  constructor(
-    private readonly prismaService: PrismaService,
-    private readonly userService: UserService,
-  ) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
   getActivityFiles(activity_uuid: string) {
     console.log('activity_uuid', activity_uuid);
@@ -27,10 +28,6 @@ export class FileService {
 
       return { buffer, name, type, timestamp, uuid };
     });
-
-    const files = filesBuffer.map(
-      ({ buffer }) => new File([buffer], 'file.png'),
-    );
 
     const filesStringArray = [];
     filesBuffer.forEach(({ buffer, name, type, timestamp, uuid }: any) => {
@@ -105,5 +102,30 @@ export class FileService {
     );
 
     return filesStringArray;
+  }
+
+  getProfilePicture(userId: number) {
+    const filePath = findProfilePicturePathById(String(userId));
+    if (!filePath) return null;
+
+    const buffer = readFileSync(filePath);
+    const fileName = filePath.split('/')[filePath.split('/').length - 1];
+    const [timestamp, user_id, name] = fileName.split('_');
+    const [_, type] = name.split('.');
+
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+
+    for (let i = 0; i < bytes.byteLength; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+
+    return {
+      string: btoa(binary),
+      name,
+      type,
+      timestamp,
+      user_id,
+    };
   }
 }

@@ -4,7 +4,6 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UserService } from '../user/user.service';
 import { PrismaService } from 'src/database/prisma.service';
 import { TokenPayloadDto } from '../auth/auth.dto';
 import { ActivityDto } from './activity.dto';
@@ -15,7 +14,6 @@ import { FileService } from '../file/file.service';
 export class ActivityService {
   constructor(
     private readonly prismaService: PrismaService,
-    private readonly userService: UserService,
     private readonly fileService: FileService,
   ) {}
 

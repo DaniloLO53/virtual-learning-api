@@ -50,3 +50,21 @@ export function findSubmissionFilesForId(id: string) {
 
   return null;
 }
+
+export function findProfilePicturePathById(id: string) {
+  const directoryPath = path.join(__dirname, '../../../profiles');
+  const files = readdirSync(directoryPath);
+
+  console.log('FILES', files);
+
+  const matchingFile = files.find((file) => {
+    const fileId = file.split('_')[1];
+    return fileId === id;
+  });
+
+  if (matchingFile) {
+    return path.join(directoryPath, matchingFile);
+  }
+
+  return null;
+}

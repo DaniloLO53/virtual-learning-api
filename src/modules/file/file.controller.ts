@@ -6,6 +6,7 @@ import {
   Param,
   ParseFilePipeBuilder,
   Post,
+  Put,
   Request,
   Response,
   StreamableFile,
@@ -25,6 +26,7 @@ import { FileService } from './file.service';
 import { findFilesForId } from './file.utils';
 import * as path from 'path';
 import { readFile } from 'fs/promises';
+import { EraseFileInterceptor } from './eraseFile.interceptor';
 
 const multerConfigTeacher = {
   storage: diskStorage({
@@ -57,9 +59,48 @@ const multerConfigStudent = {
   }),
 };
 
+const multerConfigProfile = {
+  storage: diskStorage({
+    destination: './profiles',
+    filename: (req: any, file, cb) => {
+      // console.log('file', file);
+      // console.log('files from req', req.files.files);
+      console.log('req user', req.user);
+
+      const currentTimeFormatted = new Date().getTime();
+      cb(null, `${currentTimeFormatted}_${req.user.id}_${file.originalname}`);
+    },
+  }),
+};
+
 @Controller('files')
 export class FileController {
   constructor(private fileService: FileService) {}
+
+  @Put('profile')
+  @RequiredRoles(Roles.Teacher, Roles.Student)
+  @UseInterceptors(
+    EraseFileInterceptor,
+    FileFieldsInterceptor([{ name: 'files' }], multerConfigProfile),
+  )
+  async uploadProfilePicture(
+    @Body() body: any,
+    @UploadedFiles() files: Array<Express.Multer.File>,
+  ) {
+    return {
+      body,
+      files,
+    };
+  }
+
+  @Get('submissions/:submissionUUID')
+  @RequiredRoles(Roles.Teacher, Roles.Student)
+  getProfilePictures(
+    @Param('submissionUUID') submissionUUID: string,
+    @Response({ passthrough: true }) response: IResponse,
+  ): any {
+    return this.fileService.getSubmissionFiles(submissionUUID);
+  }
 
   @Post('activities/:activityUUID/upload/teacher')
   @RequiredRoles(Roles.Teacher)
@@ -68,15 +109,8 @@ export class FileController {
   )
   async uploadFileAndPassValidation(
     @Body() body: any,
-    @Request() req: any,
-    @Headers() headers: any,
     @UploadedFiles() files: Array<Express.Multer.File>,
   ) {
-    console.log('UPLOADED');
-    console.log('files from req 2', req.headers);
-
-    // const res = await uploadToGoogle();
-
     return {
       body,
       files,
@@ -90,15 +124,8 @@ export class FileController {
   )
   async uploadSubmit(
     @Body() body: any,
-    @Request() req: any,
-    @Headers() headers: any,
     @UploadedFiles() files: Array<Express.Multer.File>,
   ) {
-    console.log('UPLOADED');
-    console.log('files from req 2', req.headers);
-
-    // const res = await uploadToGoogle();
-
     return {
       body,
       files,
