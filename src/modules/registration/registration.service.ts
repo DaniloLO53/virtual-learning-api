@@ -9,16 +9,17 @@ import { PrismaService } from 'src/database/prisma.service';
 import { Registration } from '@prisma/client';
 import { RegistrationDto } from './registration.dto';
 import * as bcrypt from 'bcrypt';
+import { FileService } from '../file/file.service';
 
 @Injectable()
 export class RegistrationService {
   constructor(
     private readonly prismaService: PrismaService,
-    private readonly userService: UserService,
+    private fileService: FileService,
   ) {}
 
   async getParticipants(course_id: number) {
-    return await this.prismaService.course.findUnique({
+    const participants = await this.prismaService.course.findUnique({
       where: {
         id: course_id,
       },
@@ -26,6 +27,15 @@ export class RegistrationService {
         teacher: {
           select: {
             email: true,
+            first_name: true,
+            last_name: true,
+            id: true,
+            profile_picture: {
+              select: {
+                title: true,
+                id: true,
+              },
+            },
           },
         },
         registrations: {
@@ -37,12 +47,45 @@ export class RegistrationService {
             student: {
               select: {
                 email: true,
+                first_name: true,
+                last_name: true,
+                id: true,
+                profile_picture: {
+                  select: {
+                    title: true,
+                    id: true,
+                  },
+                },
               },
             },
           },
         },
       },
     });
+
+    const teacherProfilePictureFile = this.fileService.getProfilePicture(
+      participants.teacher.id,
+    );
+    const teacherWithProfilePicture = {
+      teacher: {
+        ...participants.teacher,
+        profilePictureFile: teacherProfilePictureFile,
+      },
+    };
+    const registrationsWithProfilePicture = participants.registrations.map(
+      (registration: any) => {
+        const profilePictureFile = this.fileService.getProfilePicture(
+          registration.student.id,
+        );
+
+        return { ...registration, profilePictureFile };
+      },
+    );
+
+    return {
+      ...teacherWithProfilePicture,
+      registrations: registrationsWithProfilePicture,
+    };
   }
 
   async delete(student_id: number, registration_id: number) {
@@ -73,8 +116,6 @@ export class RegistrationService {
   async create(registrationDto: RegistrationDto): Promise<Registration> {
     const { student_id, course_id, password } = registrationDto;
 
-    console.log('HEY');
-
     const course = await this.prismaService.course.findUnique({
       where: {
         id: course_id,
@@ -102,13 +143,14 @@ export class RegistrationService {
         message: 'Course not accepting registrations',
       });
     }
+    console.log('course password', course.password);
+    let validatePassword: boolean;
 
-    const validatePassword = await bcrypt.compare(
-      password,
-      course.password || '',
-    );
+    if (course.password) {
+      validatePassword = await bcrypt.compare(password, course.password || '');
+    }
 
-    if (course.password && !validatePassword) {
+    if (course.password && validatePassword === false) {
       throw new UnauthorizedException({
         message: 'Incorrect password',
       });

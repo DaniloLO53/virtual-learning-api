@@ -20,12 +20,12 @@ export class EraseFileInterceptor implements NestInterceptor {
 
     const oldProfilePicturePath = findProfilePicturePathById(String(id));
 
-    fs.unlink(oldProfilePicturePath, (err) => {
-      if (err) throw err;
-      console.log(oldProfilePicturePath, ' was deleted');
-    });
-
-    console.log('oldProfilePicturePath', oldProfilePicturePath);
+    if (oldProfilePicturePath) {
+      fs.unlink(oldProfilePicturePath, (err) => {
+        if (err) throw err;
+        console.log(oldProfilePicturePath, ' was deleted');
+      });
+    }
 
     const now = Date.now();
     return next

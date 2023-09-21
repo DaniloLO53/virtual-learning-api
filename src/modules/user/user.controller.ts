@@ -29,11 +29,10 @@ export class UserController {
 
   @Get('profile')
   @RequiredRoles(Roles.Teacher, Roles.Student)
-  async getProfile(@Headers('role') role: Role, @Request() request: any) {
+  async getMyProfile(@Headers('role') role: Role, @Request() request: any) {
     const { id } = request.user;
     return await this.userService.getProfile(id, role);
   }
-
   @Put('profile')
   @RequiredRoles(Roles.Teacher, Roles.Student)
   async editProfile(
