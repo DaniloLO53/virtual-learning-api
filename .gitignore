@@ -2,6 +2,10 @@
 /dist
 /node_modules
 
+./uploads
+./submissions
+./profiles
+
 # Logs
 logs
 *.log

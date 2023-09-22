@@ -1,5 +1,5 @@
 # busca imagem base do node
-FROM node
+FROM node:20
 
 # usa essa pasta como diretório de trabalho (tipo um CD)
 WORKDIR /usr/src
@@ -8,7 +8,7 @@ WORKDIR /usr/src
 COPY . .
 
 # "expoe" a porta 3000
-EXPOSE 3000
+EXPOSE 5000
 
 # baixa as dependências
 RUN npm i
