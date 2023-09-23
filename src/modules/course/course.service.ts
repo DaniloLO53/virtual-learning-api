@@ -9,12 +9,13 @@ import { PrismaService } from 'src/database/prisma.service';
 import { TokenPayloadDto } from '../auth/auth.dto';
 import { Course } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { FileService } from '../file/file.service';
 
 @Injectable()
 export class CourseService {
   constructor(
     private readonly prismaService: PrismaService,
-    private readonly userService: UserService,
+    private readonly fileService: FileService,
   ) {}
 
   async getByQueries(query: string) {
@@ -88,12 +89,36 @@ export class CourseService {
         id: true,
         code: true,
         title: true,
+        teacher: {
+          select: {
+            email: true,
+            first_name: true,
+            last_name: true,
+          },
+        },
+        activities: {
+          select: {
+            _count: {
+              select: {
+                activities_done: {
+                  where: {
+                    activity: {
+                      course: {
+                        teacher_id,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
   }
 
   async getRegisteredCourses(student_id: number) {
-    return await this.prismaService.course.findMany({
+    const courses = await this.prismaService.course.findMany({
       where: {
         registrations: {
           some: {
@@ -108,6 +133,9 @@ export class CourseService {
         teacher: {
           select: {
             email: true,
+            id: true,
+            first_name: true,
+            last_name: true,
           },
         },
         activities: {
@@ -130,6 +158,20 @@ export class CourseService {
           ],
         },
       },
+    });
+
+    return courses.map((course) => {
+      const { string } = this.fileService.getProfilePicture(course.teacher.id);
+
+      return {
+        ...course,
+        teacher: {
+          ...course.teacher,
+          profilePictureFile: {
+            string,
+          },
+        },
+      };
     });
   }
 
